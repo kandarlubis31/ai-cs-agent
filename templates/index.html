@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Service - Toko Kami</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #ef4444;
+            --text: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --user-bg: #2563eb;
+            --user-text: #ffffff;
+            --ai-bg: #ffffff;
+            --ai-text: #1f2937;
+            --shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+            --radius: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .chat-header {
+            background: var(--primary);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 10;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .avatar {
+            width: 42px;
+            height: 42px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: #22c55e;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+        }
+
+        .header-info {
+            flex: 1;
+        }
+
+        .header-name {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+
+        .header-status {
+            font-size: 12px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 2px;
+        }
+
+        .reset-btn {
+            background: rgba(255,255,255,0.15);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+
+        .reset-btn:hover {
+            background: var(--danger);
+        }
+
+        #chat-box {
+            height: 450px;
+            overflow-y: auto;
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            scroll-behavior: smooth;
+        }
+
+        #chat-box::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        #chat-box::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        #chat-box::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .msg-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            animation: fadeSlideUp 0.3s ease forwards;
+        }
+
+        .msg-row.user {
+            flex-direction: row-reverse;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .msg-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--surface);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .msg-avatar.user-av {
+            background: var(--primary);
+            color: white;
+        }
+
+        .msg-col {
+            display: flex;
+            flex-direction: column;
+            max-width: 78%;
+        }
+
+        .msg-col.right {
+            align-items: flex-end;
+        }
+
+        .bubble {
+            padding: 12px 16px;
+            font-size: 14px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            overflow-wrap: break-word;
+            word-break: normal;
+            width: fit-content;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .bubble.ai {
+            background: var(--ai-bg);
+            color: var(--ai-text);
+            border-radius: 16px 16px 16px 4px;
+        }
+
+        .bubble.user {
+            background: var(--user-bg);
+            color: var(--user-text);
+            border-radius: 16px 16px 4px 16px;
+        }
+
+        .msg-time {
+            font-size: 10px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            padding: 0 4px;
+        }
+
+        .typing-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            animation: fadeSlideUp 0.2s ease forwards;
+        }
+
+        .typing-bubble {
+            background: var(--ai-bg);
+            border-radius: 16px 16px 16px 4px;
+            padding: 14px 18px;
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: bounce 1.2s infinite;
+        }
+
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes bounce {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+            30% { transform: translateY(-4px); opacity: 1; }
+        }
+
+        .chat-footer {
+            background: var(--surface);
+            padding: 14px 16px;
+            box-shadow: 0 -1px 10px rgba(0,0,0,0.03);
+            z-index: 10;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            font-family: inherit;
+            font-size: 14px;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            transition: all 0.2s ease;
+            min-width: 0;
+        }
+
+        #user-input:focus {
+            border-color: var(--primary);
+            background: var(--surface);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        #user-input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #send-btn {
+            width: 46px;
+            height: 46px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        #send-btn:hover {
+            background: var(--primary-hover);
+            transform: scale(1.05);
+        }
+
+        #send-btn:active {
+            transform: scale(0.95);
+        }
+
+        #send-btn:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #send-btn svg {
+            width: 20px;
+            height: 20px;
+            margin-left: 2px;
+        }
+
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: var(--text);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 99;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .char-counter {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-align: right;
+            margin-top: 8px;
+            margin-right: 4px;
+            transition: color 0.2s;
+        }
+
+        .char-counter.warn {
+            color: var(--danger);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="chat-header">
+        <div class="header-left">
+            <div class="avatar-wrap">
+                <div class="avatar">🧢</div>
+                <div class="online-dot"></div>
+            </div>
+            <div class="header-info">
+                <div class="header-name">Yono - CS Toko Kami</div>
+                <div class="header-status">Online · Langsung gas balas!</div>
+            </div>
+        </div>
+        <button class="reset-btn" id="reset-btn" title="Hapus Riwayat">Bersihkan</button>
+    </div>
+
+    <div id="chat-box"></div>
+
+    <div class="chat-footer">
+        <div class="input-row">
+            <input type="text" id="user-input" placeholder="Ketik pesan di sini..." maxlength="500" autocomplete="off">
+            <button id="send-btn" title="Kirim">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="char-counter" id="char-counter">0 / 500</div>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+    const MAX_CHARS = 500;
+    const STORAGE_KEY_ID = 'yono_session_id';
+    const STORAGE_KEY_CHAT = 'yono_chat_history';
+    let isSending = false;
+
+    let currentSessionId = localStorage.getItem(STORAGE_KEY_ID);
+    if (!currentSessionId) {
+        currentSessionId = Math.random().toString(36).substring(2, 15);
+        localStorage.setItem(STORAGE_KEY_ID, currentSessionId);
+    }
+
+    const chatBox = document.getElementById('chat-box');
+    const inputField = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-btn');
+    const charCounter = document.getElementById('char-counter');
+    const toastElement = document.getElementById('toast');
+    const resetButton = document.getElementById('reset-btn');
+
+    function getFormattedTime() {
+        return new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function encodeHTMLText(str) {
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function scrollToBottom() {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function displayToastMessage(msg, duration = 3000) {
+        toastElement.textContent = msg;
+        toastElement.classList.add('show');
+        setTimeout(() => toastElement.classList.remove('show'), duration);
+    }
+
+    function toggleInputState(state) {
+        isSending = state;
+        sendButton.disabled = state;
+        inputField.disabled = state;
+    }
+
+    function saveMessageToLocal(role, text, time) {
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY_CHAT)) || [];
+        history.push({ role, text, time });
+        localStorage.setItem(STORAGE_KEY_CHAT, JSON.stringify(history));
+    }
+
+    function renderMessage(role, text, time, saveToLocal = true) {
+        const rowDiv = document.createElement('div');
+        
+        if (role === 'user') {
+            rowDiv.className = 'msg-row user';
+            rowDiv.innerHTML = `
+                <div class="msg-col right">
+                    <div class="bubble user">${encodeHTMLText(text)}</div>
+                    <div class="msg-time">${time}</div>
+                </div>
+            `;
+        } else {
+            rowDiv.className = 'msg-row';
+            rowDiv.innerHTML = `
+                <div class="msg-avatar">🧢</div>
+                <div class="msg-col">
+                    <div class="bubble ai">${encodeHTMLText(text)}</div>
+                    <div class="msg-time">${time}</div>
+                </div>
+            `;
+        }
+        
+        chatBox.appendChild(rowDiv);
+        scrollToBottom();
+        
+        if (saveToLocal) {
+            saveMessageToLocal(role, text, time);
+        }
+    }
+
+    function renderTypingIndicator() {
+        const indicatorDiv = document.createElement('div');
+        indicatorDiv.className = 'typing-row';
+        indicatorDiv.id = 'typing-indicator';
+        indicatorDiv.innerHTML = `
+            <div class="msg-avatar">🧢</div>
+            <div class="typing-bubble">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        `;
+        chatBox.appendChild(indicatorDiv);
+        scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+        const indicatorDiv = document.getElementById('typing-indicator');
+        if (indicatorDiv) indicatorDiv.remove();
+    }
+
+    async function processOutgoingMessage() {
+        const messageText = inputField.value.trim();
+
+        if (!messageText) return;
+        if (messageText.length > MAX_CHARS) {
+            displayToastMessage(`Pesan maksimal ${MAX_CHARS} karakter bro.`);
+            return;
+        }
+        if (isSending) return;
+
+        const currentTime = getFormattedTime();
+        renderMessage('user', messageText, currentTime);
+        
+        inputField.value = '';
+        charCounter.textContent = `0 / ${MAX_CHARS}`;
+        charCounter.classList.remove('warn');
+        
+        toggleInputState(true);
+        renderTypingIndicator();
+
+        try {
+            const abortController = new AbortController();
+            const timeoutId = setTimeout(() => abortController.abort(), 120000);
+
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    message: messageText,
+                    session_id: currentSessionId
+                }),
+                signal: abortController.signal
+            });
+
+            clearTimeout(timeoutId);
+
+            if (!response.ok) {
+                throw new Error('Server error');
+            }
+
+            const responseData = await response.json();
+
+            if (!responseData.reply) {
+                throw new Error('Data tidak valid');
+            }
+
+            removeTypingIndicator();
+            renderMessage('ai', responseData.reply, getFormattedTime());
+
+        } catch (error) {
+            removeTypingIndicator();
+            displayToastMessage('Server lagi sibuk bro.');
+            renderMessage('ai', 'Waduh bro, koneksi gue lagi putus nih. Coba kirim ulang ya!', getFormattedTime(), false);
+        } finally {
+            toggleInputState(false);
+            inputField.focus();
+        }
+    }
+
+    resetButton.addEventListener('click', async () => {
+        if(!confirm("Yakin mau hapus chat lu sama Yono?")) return;
+        
+        localStorage.removeItem(STORAGE_KEY_CHAT);
+        chatBox.innerHTML = '';
+        
+        try {
+            await fetch('/reset', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ session_id: currentSessionId })
+            });
+        } catch(e) {
+            console.log(e);
+        }
+        
+        renderMessage('ai', 'Halo bro! Gue Yono, CS yang siap bantu cari barang incaran lu. Ada yang bisa dibantu?', getFormattedTime());
+        displayToastMessage('Chat dibersihkan');
+    });
+
+    inputField.addEventListener('input', () => {
+        const textLength = inputField.value.length;
+        charCounter.textContent = `${textLength} / ${MAX_CHARS}`;
+        charCounter.classList.toggle('warn', textLength > 400);
+    });
+
+    inputField.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            processOutgoingMessage();
+        }
+    });
+
+    sendButton.addEventListener('click', () => {
+        processOutgoingMessage();
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let history = JSON.parse(localStorage.getItem(STORAGE_KEY_CHAT)) || [];
+        
+        if (history.length > 0) {
+            history.forEach(msg => {
+                renderMessage(msg.role, msg.text, msg.time, false);
+            });
+        } else {
+            setTimeout(() => {
+                renderMessage('ai', 'Halo bro! Gue Yono, CS di sini. Mau cari barang apa nih hari ini? Langsung gas tanya aja!', getFormattedTime());
+            }, 500);
+        }
+    });
+</script>
+</body>
+</html>
