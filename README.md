@@ -57,6 +57,14 @@ Use `python app_lokal.py` for the local variant.
 - Sessions live in memory, so restarting the process clears every conversation. Fine for a
   demo; use a real session store if you run it under multiple workers.
 
+---
+
+## Bahasa Indonesia
+
+**ai-cs-agent** adalah chatbot layanan pelanggan berbasis Flask yang menjawab pertanyaan produk memakai LLM, dengan jawaban berpijak pada katalog toko yang tersimpan di MySQL.
+
+---
+
 ## License
 
 MIT
